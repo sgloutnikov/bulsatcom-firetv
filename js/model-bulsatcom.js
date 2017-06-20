@@ -8,7 +8,7 @@
 
     // the model for the Media Sample Data
     // {Object} appSettings are the user-defined settings from the index page
-    function JSONMediaModel(appSettings) {
+    function BulsatcomModel(appSettings) {
          // mixin inheritance, initialize this as an event handler for these events:
          Events.call(this, ['error']);
          
@@ -24,11 +24,61 @@
          //timeout default to 1 min
          this.TIMEOUT = 60000;
 
+
         /**
          * This function loads the initial data needed to start the app and calls the provided callback with the data when it is fully loaded
          * @param {function} the callback function to call with the loaded data
          */
-        this.loadInitialData = function (dataLoadedCallback) {
+        this.authenticate = function (deviceId, authenticationCallback) {
+            var requestData = {
+                url: 'https://api.iptv.bulsat.com/?auth',
+                type: 'POST',
+                crossDomain: true,
+                dataType: 'json',
+                context : this,
+                cache : true,
+                timeout: this.TIMEOUT,
+                data: {
+                    //TODO: Prompt/Save in File...
+                    'user': '',
+                    'pass': '',
+                    'device_id': deviceId,
+                    'device_name': 'samsung SCH-I679',
+                    'os_version': '4.4.2',
+                    'os_type': 'android',
+                    'app_version': '0.3.6'
+                },
+                success : function() {
+                    var loginData = arguments;
+                    authenticationCallback(loginData);
+                }.bind(this),
+                error : function(jqXHR, textStatus) {
+                    // Data feed error is passed to model's parent (app.js) to handle
+                    if (jqXHR.status === 0) {
+                        this.trigger("error", ErrorTypes.INITIAL_NETWORK_ERROR, errorHandler.genStack());
+                        return;
+                    }
+                    switch (textStatus) {
+                        case "timeout" :
+                            this.trigger("error", ErrorTypes.INITIAL_FEED_TIMEOUT, errorHandler.genStack());
+                            break;
+                        case "parsererror" :
+                            this.trigger("error", ErrorTypes.INITIAL_PARSING_ERROR, errorHandler.genStack());
+                            break;
+                        default:
+                            this.trigger("error", ErrorTypes.INITIAL_FEED_ERROR, errorHandler.genStack());
+                            break;
+                    }
+                }.bind(this)
+            };
+            utils.ajaxWithRetry(requestData);
+        }.bind(this);
+
+        /**
+         * This function loads the initial data needed to start the app and calls the provided callback with the data when it is fully loaded
+         * @param {function} the callback function to call with the loaded data
+         */
+        this.loadInitialData = function (session, dataLoadedCallback) {
             var requestData = {
                  url: appSettings.dataURL,
                  type: 'GET',
@@ -37,9 +87,12 @@
                  context : this,
                  cache : true,
                  timeout: this.TIMEOUT,
+                 headers: {
+                     'SSBULSATAPI': session
+                 },
                  success : function() {
-                     var contentData = arguments[0];
-                     this.handleJsonData(contentData);
+                     var channelData = arguments[0];
+                     this.handleJsonData(channelData);
                      dataLoadedCallback();
                  }.bind(this),
                  error : function(jqXHR, textStatus) {
@@ -65,10 +118,34 @@
         }.bind(this);
 
        /**
-        * Handles requests that contain json data
-        * @param {Object} jsonData data returned from request
+        * Handles requests that contain json data from API
+        * @param {Object} originalJsonData data returned from API request
         */
-        this.handleJsonData = function (jsonData) {
+        this.handleJsonData = function (originalJsonData) {
+            //Format Original Data for Application
+            var json = new Object();
+            json.media = [];
+            for (var i = 0; i < originalJsonData.length; i++) {
+                var item = new Object();
+                item.id = originalJsonData[i]['channel'];
+                item.title = originalJsonData[i]['title'];
+                //TODO: Save images to local
+                item.thumbURL = originalJsonData[i]['logo_epg'];
+                item.imgURL = originalJsonData[i]['logo_epg'];
+                item.videoURL = originalJsonData[i]['sources'];
+                if (originalJsonData[i]['program']) {
+                    item.description = originalJsonData[i]['program']['title'];
+                }
+                item.type = "video-live";
+                item.alwaysLive = true;
+                var categories = [];
+                categories.push("Всички");
+                categories.push(originalJsonData[i]['genre']);
+                item.categories = categories;
+                json.media.push(item);
+            }
+            var jsonData = json;
+
             this.categoryData = [];
             this.currentCategory = 0;
             this.mediaData = jsonData.media;
@@ -345,7 +422,7 @@
 
     }
 
-    exports.JSONMediaModel = JSONMediaModel;
+    exports.BulsatcomModel = BulsatcomModel;
 
 })(window);
 

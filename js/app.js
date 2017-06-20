@@ -57,7 +57,8 @@
     }
 
     document.addEventListener("amazonPlatformReady" , onAmazonPlatformReady, false);  
-    window.addEventListener('orientationchange', handleDeviceOrientation, false); 
+    window.addEventListener('orientationchange', handleDeviceOrientation, false);
+
 
    /**
     * The app object : the controller for the app, it creates views, manages navigation between views
@@ -75,11 +76,38 @@
         //main application container div
         this.$appContainer = $("#app-container");
 
+        //Session header
+        this.sessionHeader = '';
+
+
+       /**
+        * Handle the call to the model to authenticate.
+        */
+       this.makeAuthenticationCall = function () {
+           this.data.authenticate(settingsParams.deviceId, this.authenticationCallback);
+        }
+
+       /**
+        * Callback from XHR to authenticate.
+        */
+       this.authenticationCallback = function(loginData) {
+           if (loginData) {
+               if (loginData[0]['Logged'] === "true") {
+                   console.log("Logged In!");
+                   this.sessionHeader = loginData[2].getResponseHeader('SSBULSATAPI');
+               }
+               else {
+                   console.log("Not Logged In!");
+               }
+           }
+           this.makeInitialDataCall();
+       }.bind(this);
+
        /**
         * Handle the call to the model to get our data 
         */
         this.makeInitialDataCall = function () {
-            this.data.loadInitialData(this.dataLoaded);
+            this.data.loadInitialData(this.sessionHeader, this.dataLoaded);
         };
 
        /**
@@ -986,7 +1014,9 @@
             errorHandler.informDev(errType, errType.errToDev, errStack);
         }.bind(this));
 
-        this.makeInitialDataCall();
+
+        this.makeAuthenticationCall();
+        //this.makeInitialDataCall();
     }
 
     exports.App = App;

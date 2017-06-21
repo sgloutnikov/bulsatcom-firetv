@@ -29,7 +29,7 @@
          * This function loads the initial data needed to start the app and calls the provided callback with the data when it is fully loaded
          * @param {function} the callback function to call with the loaded data
          */
-        this.authenticate = function (deviceId, authenticationCallback) {
+        this.authenticate = function (authenticationCallback) {
             var requestData = {
                 url: 'https://api.iptv.bulsat.com/?auth',
                 type: 'POST',
@@ -40,9 +40,9 @@
                 timeout: this.TIMEOUT,
                 data: {
                     //TODO: Prompt/Save in File...
-                    'user': '',
-                    'pass': '',
-                    'device_id': deviceId,
+                    'user': appSettings.username,
+                    'pass': appSettings.password,
+                    'device_id': appSettings.deviceId,
                     'device_name': 'samsung SCH-I679',
                     'os_version': '4.4.2',
                     'os_type': 'android',
@@ -91,9 +91,8 @@
                      'SSBULSATAPI': session
                  },
                  success : function() {
-                     var originalChannelData = this.processOriginalData(arguments[0]);
-                     console.log(originalChannelData);
-                     this.handleJsonData(originalChannelData);
+                     var channelData = this.processOriginalData(arguments[0]);
+                     this.handleJsonData(channelData);
                      dataLoadedCallback();
                  }.bind(this),
                  error : function(jqXHR, textStatus) {
@@ -130,10 +129,8 @@
                 var item = new Object();
                 item.id = originalJsonData[i]['channel'];
                 item.title = originalJsonData[i]['title'];
-                //TODO: Save images to local
-                item.thumbURL = originalJsonData[i]['logo_epg'];
+                //item.thumbURL = img;
                 item.imgURL = originalJsonData[i]['logo_epg'];
-                //TODO: Look into following URL to allow FireTV player to switch quality
                 item.videoURL = originalJsonData[i]['sources'];
                 if (originalJsonData[i]['program']) {
                     item.description = originalJsonData[i]['program']['title'];
@@ -150,8 +147,8 @@
         }.bind(this);
 
        /**
-        * Handles requests that contain json data from API
-        * @param {Object} originalJsonData data returned from API request
+        * Handles web app json data
+        * @param {Object} jsonData web app ready media JSON.
         */
         this.handleJsonData = function (jsonData) {
             this.categoryData = [];

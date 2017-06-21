@@ -161,6 +161,7 @@
             var foundVideo = false;
             this.nextIndex = this.currentIndex + 1;
             while (!foundVideo && this.items.length > this.nextIndex) {
+                console.log("From Playlist Player View: " + this.items[this.currentIndex + 1].videoURL);
                 if (this.items[this.currentIndex + 1].videoURL !== null) {
                     foundVideo = true;
                 }

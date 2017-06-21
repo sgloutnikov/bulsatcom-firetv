@@ -221,50 +221,63 @@
          * Creates the main content view from the template and appends it to the given element
          */
         this.render = function ($container, data, index) {
-            // Build the main content template and add it
-            this.items = data;
-            var video_data = data[index];
-            this.currentIndex = index;
-            var html = utils.buildTemplate($("#player-view-template"), video_data);
-            $container.append(html);
-            this.$el = $container.children().last();
-
-            this.$containerControls = $container.find(".player-controls-container");
-            this.containerControls = this.$containerControls[0];
-
-            // create the video element
-            this.videoElement = document.createElement('video');
-            this.videoElement.className = 'player-content-video';
-            this.videoElement.src = video_data.videoURL;
-            this.videoElement.type = 'video/mp4';
-            this.handleClosedCaptioning(video_data.tracks);
-            this.$el.append(this.videoElement);
-
-            this.videoElement.focus();
-
-            //add event listeners
-            this.videoElement.addEventListener("canplay", this.canPlayHandler);
-            this.videoElement.addEventListener("ended", this.videoEndedHandler);
-            this.videoElement.addEventListener("timeupdate", this.timeUpdateHandler);
-            this.videoElement.addEventListener("pause", this.pauseEventHandler);
-            this.videoElement.addEventListener("error", this.errorHandler);
-
-            //listener for visual on video playback only - remove for non-visual on implementation
-            this.videoElement.addEventListener(utils.vendorPrefix('fullscreenchange').toLowerCase(), this.fullScreenChangeHandler);
-
-            // create controls
-            if (video_data.type === "video-live") {
-                this.isLive = true;
-                this.controlsView = new LiveControlsView();
-                this.controlsView.render(this.$el, video_data, this); 
+            // Hack to follow redirect. Unredirected HLS links do not switch to higher quality in FTV player
+            var theRender = this;
+            if (data[index].videoURL.search("redirect") > 0) {
+                var request = new XMLHttpRequest;
+                request.open('GET', data[index].videoURL, true);
+                request.onload = function(){
+                    data[index].videoURL = request.getResponseHeader('BULSAT_URL_ADDRESS');
+                    theRender.render($container, data, index);
+                };
+                request.send();
             }
             else {
-                this.controlsView = new ControlsView();
-                this.controlsView.render(this.$el, video_data, this); 
-            }
+                // Build the main content template and add it
+                this.items = data;
+                var video_data = data[index];
+                this.currentIndex = index;
+                var html = utils.buildTemplate($("#player-view-template"), video_data);
+                $container.append(html);
+                this.$el = $container.children().last();
 
-            this.videoElement.addEventListener('durationchange', this.durationChangeHandler);
-            this.knownPlayerErrorTriggered = false;
+                this.$containerControls = $container.find(".player-controls-container");
+                this.containerControls = this.$containerControls[0];
+
+                // create the video element
+                this.videoElement = document.createElement('video');
+                this.videoElement.className = 'player-content-video';
+                this.videoElement.src = video_data.videoURL;
+                this.videoElement.type = 'video/mp4';
+                this.handleClosedCaptioning(video_data.tracks);
+                this.$el.append(this.videoElement);
+
+                this.videoElement.focus();
+
+                //add event listeners
+                this.videoElement.addEventListener("canplay", this.canPlayHandler);
+                this.videoElement.addEventListener("ended", this.videoEndedHandler);
+                this.videoElement.addEventListener("timeupdate", this.timeUpdateHandler);
+                this.videoElement.addEventListener("pause", this.pauseEventHandler);
+                this.videoElement.addEventListener("error", this.errorHandler);
+
+                //listener for visual on video playback only - remove for non-visual on implementation
+                this.videoElement.addEventListener(utils.vendorPrefix('fullscreenchange').toLowerCase(), this.fullScreenChangeHandler);
+
+                // create controls
+                if (video_data.type === "video-live") {
+                    this.isLive = true;
+                    this.controlsView = new LiveControlsView();
+                    this.controlsView.render(this.$el, video_data, this);
+                }
+                else {
+                    this.controlsView = new ControlsView();
+                    this.controlsView.render(this.$el, video_data, this);
+                }
+
+                this.videoElement.addEventListener('durationchange', this.durationChangeHandler);
+                this.knownPlayerErrorTriggered = false;
+            }
         };
 
         /**

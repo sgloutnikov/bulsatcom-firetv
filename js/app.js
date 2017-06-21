@@ -84,7 +84,7 @@
         * Handle the call to the model to authenticate.
         */
        this.makeAuthenticationCall = function () {
-           this.data.authenticate(settingsParams.deviceId, this.authenticationCallback);
+           this.data.authenticate(this.authenticationCallback);
         }
 
        /**
@@ -93,8 +93,8 @@
        this.authenticationCallback = function(loginData) {
            if (loginData) {
                if (loginData[0]['Logged'] === "true") {
-                   console.log("Logged In!");
                    this.sessionHeader = loginData[2].getResponseHeader('SSBULSATAPI');
+                   console.log("Logged In! Session: " + this.sessionHeader);
                }
                else {
                    console.log("Not Logged In!");
@@ -156,6 +156,24 @@
         */
         this.exitApp = function () {
             if (confirm("Are you sure you want to exit?")) {
+                var requestData = {
+                    url: 'https://api.iptv.bulsat.com/?auth',
+                    type: 'POST',
+                    crossDomain: true,
+                    dataType: 'json',
+                    context : this,
+                    timeout: this.TIMEOUT,
+                    headers: {
+                        'SSBULSATAPI': this.sessionHeader
+                    },
+                    data: {
+                        'logout': '1'
+                    },
+                    success : function() {
+
+                    }.bind(this)
+                };
+                utils.ajaxWithRetry(requestData);
                 window.open('', '_self').close();
             }
             buttons.resync();

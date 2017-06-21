@@ -36,7 +36,7 @@
                 crossDomain: true,
                 dataType: 'json',
                 context : this,
-                cache : true,
+                followAllRedirects : true,
                 timeout: this.TIMEOUT,
                 data: {
                     //TODO: Prompt/Save in File...
@@ -91,8 +91,9 @@
                      'SSBULSATAPI': session
                  },
                  success : function() {
-                     var channelData = arguments[0];
-                     this.handleJsonData(channelData);
+                     var originalChannelData = this.processOriginalData(arguments[0]);
+                     console.log(originalChannelData);
+                     this.handleJsonData(originalChannelData);
                      dataLoadedCallback();
                  }.bind(this),
                  error : function(jqXHR, textStatus) {
@@ -117,11 +118,11 @@
              utils.ajaxWithRetry(requestData);
         }.bind(this);
 
-       /**
-        * Handles requests that contain json data from API
-        * @param {Object} originalJsonData data returned from API request
-        */
-        this.handleJsonData = function (originalJsonData) {
+        /**
+         * Handles requests that contain json data from API
+         * @param {Object} originalJsonData data returned from API request
+         */
+        this.processOriginalData = function (originalJsonData) {
             //Format Original Data for Application
             var json = new Object();
             json.media = [];
@@ -132,6 +133,7 @@
                 //TODO: Save images to local
                 item.thumbURL = originalJsonData[i]['logo_epg'];
                 item.imgURL = originalJsonData[i]['logo_epg'];
+                //TODO: Look into following URL to allow FireTV player to switch quality
                 item.videoURL = originalJsonData[i]['sources'];
                 if (originalJsonData[i]['program']) {
                     item.description = originalJsonData[i]['program']['title'];
@@ -144,8 +146,14 @@
                 item.categories = categories;
                 json.media.push(item);
             }
-            var jsonData = json;
+            return json;
+        }.bind(this);
 
+       /**
+        * Handles requests that contain json data from API
+        * @param {Object} originalJsonData data returned from API request
+        */
+        this.handleJsonData = function (jsonData) {
             this.categoryData = [];
             this.currentCategory = 0;
             this.mediaData = jsonData.media;

@@ -6,7 +6,7 @@
         username: "",
         password: "",
         //Set a device name
-        deviceId: "",
+        deviceId: "aftv2",
         Model: BulsatcomModel,
         PlayerView: PlayerView,
         PlaylistView: PlaylistPlayerView,

@@ -155,27 +155,13 @@
         * User has pressed the back button
         */
         this.exitApp = function () {
+            //TODO: App won't exit when packaged in apk
+            /*
             if (confirm("Are you sure you want to exit?")) {
-                var requestData = {
-                    url: 'https://api.iptv.bulsat.com/?auth',
-                    type: 'POST',
-                    crossDomain: true,
-                    dataType: 'json',
-                    context : this,
-                    timeout: this.TIMEOUT,
-                    headers: {
-                        'SSBULSATAPI': this.sessionHeader
-                    },
-                    data: {
-                        'logout': '1'
-                    },
-                    success : function() {
-
-                    }.bind(this)
-                };
-                utils.ajaxWithRetry(requestData);
+                buttons.resync();
                 window.open('', '_self').close();
             }
+            */
             buttons.resync();
         };
 

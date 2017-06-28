@@ -221,8 +221,8 @@
          * Creates the main content view from the template and appends it to the given element
          */
         this.render = function ($container, data, index) {
-            // Hack to follow redirect. Non-direct HLS links do not switch to higher quality in FTV player
             var theRender = this;
+            //Non-direct HLS links do not switch to higher quality in FTV player
             if (data[index].videoURL.search("redirect") > 0) {
                 var request = new XMLHttpRequest;
                 request.open('GET', data[index].videoURL, true);

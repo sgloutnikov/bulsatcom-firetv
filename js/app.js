@@ -79,13 +79,17 @@
         //Session header
         this.sessionHeader = '';
 
+        //Last Media Data Refresh
+        this.lastRefreshed = null;
+        this.TWO_HOURS = 2*60*60*1000;
+
 
        /**
         * Handle the call to the model to authenticate.
         */
        this.makeAuthenticationCall = function () {
            this.data.authenticate(this.authenticationCallback);
-        }
+       };
 
        /**
         * Callback from XHR to authenticate.
@@ -94,6 +98,7 @@
            if (loginData) {
                if (loginData[0]['Logged'] === "true") {
                    this.sessionHeader = loginData[2].getResponseHeader('SSBULSATAPI');
+                   this.lastRefreshed = new Date();
                    console.log("Logged In! Session: " + this.sessionHeader);
                }
                else {
@@ -378,17 +383,25 @@
             * @param {Number} index the index of the selected item
             */
             oneDView.on('select', function(index) {
-                this.data.setCurrentItem(index);
-                if (this.categoryData[index].type === "subcategory") {
-                    this.transitionToSubCategory(this.categoryData, index);
-                } 
-                else if (this.categoryData[index].type === "video-live" && !this.categoryData[index].isLiveNow) {
-                    alert("This video is not yet available.");
-                    buttons.resync();
+                //Refresh the mediaData if older than two hours. Hack to get around being unable to close app when
+                //packaged and ran on FireTV
+                if ((new Date() - this.lastRefreshed) > this.TWO_HOURS) {
+                    console.log("Making Refresh Authentication");
+                    this.makeAuthenticationCall();
                 }
                 else {
-                    this.createLiveStreamUpdater(this.categoryData, index);
-                    this.transitionToPlayer(this.categoryData, index);
+                    this.data.setCurrentItem(index);
+                    if (this.categoryData[index].type === "subcategory") {
+                        this.transitionToSubCategory(this.categoryData, index);
+                    }
+                    else if (this.categoryData[index].type === "video-live" && !this.categoryData[index].isLiveNow) {
+                        alert("This video is not yet available.");
+                        buttons.resync();
+                    }
+                    else {
+                        this.createLiveStreamUpdater(this.categoryData, index);
+                        this.transitionToPlayer(this.categoryData, index);
+                    }
                 }
             }, this);
 

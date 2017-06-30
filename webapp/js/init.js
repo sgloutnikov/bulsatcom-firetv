@@ -5,7 +5,7 @@
     var settings = {
         // Your username (email)
         username: "",
-        // Encrypted password from bscEncrypt.jar
+        // Encrypted password hash from bscEncrypt.jar
         password: "",
         //Set a device name
         deviceId: "aftv2",

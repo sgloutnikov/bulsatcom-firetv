@@ -11,7 +11,7 @@ Have Java installed with Unlimited Strength Jurisdiction Policy Files.
 
 Edit **js/init.js**  
 username: Your login email.  
-password: Password hash. Generated with bscEncrypt.jar -- java -jar bscEncrypt.jar <username> <password>  
+password: Password hash. Generated with bscEncrypt.jar -- "java -jar bscEncrypt.jar username password"  
 deviceId: Some device id -- aftv2.
 
 ### Build / Run
@@ -25,6 +25,6 @@ Follow the instructions to package the apk [here.](http://cordova.apache.org/doc
 The app icon can be found inside assets/icon/icon.png.
 
 ### Known Issues
-* App currently can't exit due to outdated Amazon WebView. Use the home button to exit it. Media links will refresh if they are older than 2 hours to prevent authentication issues.
+* App currently can't exit due to the outdated Amazon WebView. Use the home button to exit it. Media links will refresh if they are older than 2 hours to prevent authentication issues.
 ### To Do
 * Add login page/method.

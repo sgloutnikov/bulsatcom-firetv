@@ -3,7 +3,9 @@
     
     //initialize the app
     var settings = {
+        // Your username (email)
         username: "",
+        // Encrypted password from bscEncrypt.jar
         password: "",
         //Set a device name
         deviceId: "aftv2",

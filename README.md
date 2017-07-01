@@ -16,9 +16,13 @@ deviceId: Some device id -- aftv2.
 
 ### Build / Run
 
-Package the app using [Apache Cordova](https://cordova.apache.org/), sign the apk, and side load it to your FireTV. Due to Amazon's outdated support for Apache Cordova, use an older version than the current.
+Package the app using [Apache Cordova](https://cordova.apache.org/), sign the apk, and side load it to your FireTV. Due to Amazon's outdated support for Apache Cordova, use an older version than the current. This means older Android SDK tools will also be needed.
 
-Verified to be working with Apache Cordova 3.6.0-0.2.8.
+Verified to be working with:  
+- Apache Cordova version 3.6.0-0.2.8 .   
+- Android SDK tools version 25.2.5 . 
+- Android SDK Platform-tools version 26 . 
+- Android 4.4.2 (API 19)
 
 Follow the instructions to package the apk [here.](http://cordova.apache.org/docs/en/3.6.0/guide/platforms/amazonfireos/index.html)
 

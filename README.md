@@ -28,7 +28,7 @@ Follow the instructions to package the apk [here.](http://cordova.apache.org/doc
 
 The app icon can be found inside assets/icon/icon.png.
 
-Finally, sideload the app and enjoy.
+Finally, sign and sideload the app.
 
 ### Known Issues
 * App currently can't exit due to the outdated Amazon WebView. Use the home button to exit it. Media links will refresh if they are older than 2 hours to prevent authentication issues.
